@@ -24,7 +24,7 @@ The app has three tabs. Each one uses different data and different models.
 
 ### Train
 
-**What you do:** Name classes (e.g. `Nintendo Switch game`, `Copic marker`, `Pokémon card`), collect training samples, then train a classifier.
+**What you do:** Name classes (e.g. `Crystal collection`, `Copic marker`, `Pokémon card`), collect training samples, then train a classifier.
 
 **How you collect samples:**
 - **Capture sample** — grab a single still frame from the live webcam
