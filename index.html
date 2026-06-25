@@ -105,7 +105,7 @@
         </div>
 
         <div id="panel-journal" class="panel" role="tabpanel" hidden>
-          <p id="ollama-status" class="status ollama-status">Checking Ollama…</p>
+          <p id="llm-status" class="status llm-status">AI assistant ready on first question.</p>
           <div id="journal-gallery" class="journal-gallery" aria-label="Journal entries"></div>
           <div id="journal-detail" class="journal-detail" hidden></div>
           <div class="field">
@@ -115,18 +115,7 @@
             </select>
           </div>
           <p class="item-title">Item: <strong id="item-display">—</strong></p>
-          <details class="ollama-settings">
-            <summary>Ollama settings (local LLM)</summary>
-            <div class="field">
-              <label for="ollama-base">Base URL</label>
-              <input id="ollama-base" type="url" value="http://localhost:11434" />
-            </div>
-            <div class="field">
-              <label for="ollama-model">Model</label>
-              <input id="ollama-model" type="text" value="qwen2.5" placeholder="qwen2.5" />
-            </div>
-            <button type="button" id="btn-save-ollama" class="btn btn--ghost">Save settings</button>
-          </details>
+
           <div class="item-chips">
             <button type="button" class="chip" data-item-chip="What is this item?">What is it?</button>
             <button type="button" class="chip" data-item-chip="How much is this worth?">Value</button>

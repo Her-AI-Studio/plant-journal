@@ -9,7 +9,6 @@ The big question for this lesson: **where does your data go, and where do the mo
 ## Run locally
 
 ```bash
-cd plant-journal
 npm install
 npm run dev
 ```
@@ -77,24 +76,23 @@ Photos and predictions are **not** sent to any AI service during identification.
 
 ### Journal
 
-**What you do:** Browse saved entries, ask questions with Ollama, and generate answers about your items.
+**What you do:** Browse saved entries and ask questions about your items using a local AI assistant powered by Transformers.js.
 
 **What runs here:**
 
 | Piece | What it is | Where it runs |
 |-------|-----------|---------------|
-| **Ollama (optional)** | Local language model that answers questions about your items | **Your computer**, via `http://localhost:11434` |
+| **SmolLM2-135M-Instruct** | Lightweight language model (135 M parameters, quantized) that answers questions about your items | Your browser (Transformers.js + ONNX Runtime Web). Downloaded once from Hugging Face, then cached locally. |
 
 **Where the data goes:**
 
 | Data | Stays on device? | Notes |
 |------|------------------|-------|
 | Journal entries (photos + notes) | Yes | Saved in `localStorage` in your browser |
-| Ollama settings (URL, model name) | Yes | Saved in `localStorage` |
-| Text sent to Ollama | Yes, on your machine | Only the **item name** and **your question text**. No photos. |
-| Ollama responses | Yes | Generated locally; displayed in the app |
+| Text sent to the model | Yes | Only the **item name** and **your question text**. No photos. Inference runs entirely in the browser. |
+| Model response | Yes | Generated locally; displayed in the app |
 
-If Ollama is not running, the app shows a helpful message. Nothing breaks.
+The language model runs **entirely in your browser** — no server, no API key, no network call after the initial download.
 
 ---
 
@@ -116,23 +114,24 @@ Camera / video / images
         ▼
    Journal photos  ──►  localStorage (on your device)
 
-Item name + question  ──►  Ollama on localhost (optional, text only)
+Item name + question  ──►  SmolLM2-135M-Instruct (browser, ONNX, text only)
 ```
 
-**Key takeaway for Week 1:** Most of this app keeps your photos and training data in the browser on your device. The only "AI model" that receives any of your content is Ollama — and even then, it only gets text, not images. You choose when to use it.
+**Key takeaway for Week 1:** Everything in this app — vision, classification, and text generation — runs locally in your browser. Your photos, videos, and questions never leave your device.
 
 ---
 
 ## What downloads from the internet (not your data)
 
-These are **one-time downloads** of model code and weights. Your photos and videos are not uploaded as part of this.
+These are **one-time downloads** of model weights. Your photos and videos are not uploaded as part of this.
 
-| Asset | Why | When |
-|-------|-----|------|
-| MobileNet weights | Pre-trained vision model | First time you open the Train or Identify tab |
-| ffmpeg.wasm core | Video frame extraction | First time you click **Extract frames & add samples** |
+| Asset | Why | When | Approx size |
+|-------|-----|------|-------------|
+| MobileNet weights | Pre-trained vision model | First time you open the Train or Identify tab | ~16 MB |
+| ffmpeg.wasm core | Video frame extraction | First time you click **Extract frames & add samples** | ~30 MB |
+| SmolLM2-135M-Instruct (q4) | In-browser language model | First time you ask a question in the Journal tab | ~270 MB |
 
-After the first load, your browser caches most of this.
+After the first load, your browser caches all of this. Subsequent loads are instant.
 
 ---
 
@@ -140,7 +139,7 @@ After the first load, your browser caches most of this.
 
 1. **Train:** Add at least two classes with three or more samples each. Use the webcam, video + ffmpeg, or imported images. Click **Train model**.
 2. **Identify:** Point at an item, click **Identify item**, add an optional note, then **Save to journal**.
-3. **Journal:** Browse entries. Ask questions with Ollama (optional).
+3. **Journal:** Browse entries. Select an item and ask a question — the model loads on first use.
 
 ### Train from video (ffmpeg)
 
@@ -161,23 +160,11 @@ Then import the JPEG folder with **Import images**.
 
 ---
 
-## Ollama setup (optional)
-
-Default: `http://localhost:11434`, model `qwen2.5`. Change under **Journal → Ollama settings**.
-
-```bash
-ollama serve
-ollama pull qwen2.5
-```
-
-**Privacy reminder:** Only item names and questions are sent to Ollama, not photos. Journal photos stay in `localStorage` on your device. Keep the base URL on `localhost` if you want everything to stay on your machine.
-
----
-
 ## Check your understanding
 
 1. When you capture a training sample, where is that image stored?
 2. What is the difference between MobileNet and the classifier you train?
 3. If you save a journal entry, where does the photo live?
-4. What text (if any) leaves your browser when you ask Ollama a question?
+4. What text (if any) leaves your browser when you ask the AI assistant a question?
 5. What happens to your trained model if you refresh the page?
+6. How is the in-browser language model (SmolLM2) different from a cloud API like ChatGPT?

@@ -12,7 +12,6 @@ import {
   getEntry,
 } from './journal.js'
 import { initItemAssistant, populateItemSelect } from './item-assistant.js'
-import { getOllamaConfig } from './ollama.js'
 
 const $ = (id) => document.getElementById(id)
 const setDisabled = (id, val) => { const el = $(id); if (el) el.disabled = val }
@@ -489,20 +488,12 @@ function setupTabs() {
       $('panel-journal').hidden = name !== 'journal'
       if (name !== 'identify') stopLiveLoop()
       if (name === 'journal') {
-        updateOllamaStatus()
         refreshJournalUi()
       }
     })
   })
 }
 
-function initOllamaInputs() {
-  const { baseUrl, model } = getOllamaConfig()
-  const baseEl = $('ollama-base')
-  const modelEl = $('ollama-model')
-  if (baseEl) baseEl.value = baseUrl
-  if (modelEl) modelEl.value = model
-}
 
 $('btn-add-class').addEventListener('click', addClass)
 classNameInput.addEventListener('keydown', (e) => {
@@ -530,7 +521,6 @@ $('btn-clear-journal')?.addEventListener('click', clearJournal)
 
 setupTabs()
 initItemAssistant()
-initOllamaInputs()
 
 ;(async () => {
   try {

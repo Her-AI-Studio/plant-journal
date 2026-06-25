@@ -1,7 +1,5 @@
 import { currentItem } from './state.js'
-import { checkOllama, ollamaGenerate, getOllamaConfig, saveOllamaConfig } from './ollama.js'
-
-let ollamaOnline = false
+import { generate, isLoaded } from './llm.js'
 
 const $ = (id) => document.getElementById(id)
 
@@ -19,11 +17,6 @@ export function initItemAssistant() {
     })
   })
 
-  $('btn-save-ollama')?.addEventListener('click', () => {
-    saveOllamaConfig($('ollama-base')?.value, $('ollama-model')?.value)
-    updateOllamaStatus()
-  })
-
   window.addEventListener('item-identified', () => {
     updateItemContext()
   })
@@ -33,7 +26,6 @@ export function initItemAssistant() {
     if (name) updateItemContext(name)
   })
 
-  updateOllamaStatus()
   if (currentItem) updateItemContext(currentItem.name)
 }
 
@@ -61,14 +53,11 @@ function updateItemContext(name) {
   }
 }
 
-async function updateOllamaStatus() {
-  const el = $('ollama-status')
+function setStatus(text, online = false) {
+  const el = $('llm-status')
   if (!el) return
-  ollamaOnline = await checkOllama()
-  el.textContent = ollamaOnline
-    ? 'Ollama connected. You can ask questions about your items.'
-    : 'Ollama not detected. Run: ollama serve'
-  el.classList.toggle('is-online', ollamaOnline)
+  el.textContent = text
+  el.classList.toggle('is-online', online)
 }
 
 function buildChatPrompt(question, itemName) {
@@ -92,16 +81,20 @@ async function askQuestion(presetQuestion) {
   appendMessage('user', question)
   if (input) input.value = ''
 
-  if (ollamaOnline) {
-    try {
-      const reply = await ollamaGenerate(buildChatPrompt(question, itemName))
-      appendMessage('assistant', reply)
-      return
-    } catch {
-      appendMessage('assistant', 'Could not reach Ollama. Make sure it is running.')
-    }
-  } else {
-    appendMessage('assistant', 'Ollama is not connected. Start it with: ollama serve')
+  const thinkingDiv = appendMessage('assistant', isLoaded() ? 'Thinking…' : 'Loading model (first run downloads ~270 MB)…')
+
+  try {
+    const reply = await generate(buildChatPrompt(question, itemName), (p) => {
+      if (p.status === 'progress' && p.progress != null) {
+        setStatus(`Loading model… ${Math.round(p.progress)}%`)
+      }
+    })
+    thinkingDiv.textContent = reply
+    setStatus('AI assistant ready.', true)
+  } catch (err) {
+    thinkingDiv.textContent = 'Failed to generate a response.'
+    setStatus('Model error. Check the console.')
+    console.error(err)
   }
 }
 
@@ -113,6 +106,5 @@ function appendMessage(role, text) {
   div.textContent = text
   box.append(div)
   box.scrollTop = box.scrollHeight
+  return div
 }
-
-export { updateOllamaStatus }
